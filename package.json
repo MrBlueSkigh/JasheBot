@@ -1,8 +1,11 @@
 {
-    "name":"JasheBot",
-    "version":"1.0.0",
-    "description":"Bot for our discord server :)",
-    "main":"bot.js",
-    "author":"Joshua Riedel",
-    "dependencies": {}
+    "name": "JasheBot",
+    "version": "1.0.0",
+    "description": "Bot for our discord server :)",
+    "main": "bot.js",
+    "author": "Joshua Riedel",
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "winston": "^3.3.3"
+    }
 }
