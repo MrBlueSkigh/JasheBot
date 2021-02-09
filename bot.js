@@ -18,8 +18,6 @@ logger.add(new logger.transports.Console, {
 });
 logger.level = 'debug';
 
-var dateIdeas = Array();
-
 // Initialize Discord Bot
 var bot = new Discord.Client({
    token: process.env.SECRET_TOKEN,
