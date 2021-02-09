@@ -11,6 +11,36 @@ const database = createConnection({
     database: 'jashebot_db',
 });
 
+class Date{
+    id;
+    date;
+    isDone;
+    constructor(){
+        this.id = 0;
+        this.date = "";
+        this.isDone = 0;
+    }
+
+    get id(){
+        return this.id;
+    }
+    get date(){
+        return this.date;
+    }
+    get isDone(){
+        return this.isDone;
+    }
+    set id(val){
+        this.id = val;
+    }
+    set date(val){
+        this.date = val;
+    }
+    set isDone(val){
+        this.isDone = val;
+    }
+}
+
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
@@ -50,12 +80,38 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
 
             case 'adddate':
+                let d = new Date();
                 var date = "";
                 args.forEach(item => {
                     date += item + " ";
                 });
-                var sql = "INSERT INTO dateideas(date) VALUES (\'"+date+"\')";
-                database.query(sql, function(err, result){
+                d.date = date;
+
+                database.query("SELECT MAX(id) AS maxid FROM dateideas", function(err, result, fields){
+                    if(result[0] != undefined){
+                        console.log("Current max id: " + result[0].maxid)
+                        if(err){
+                            bot.sendMessage({
+                                to:channelID,
+                                message:err
+                            });
+                        }
+                        else{
+                            d.id = result[0].maxid + 1
+                            console.log("Setting new id to: " + d.id)
+                            return d;
+                        }
+                    }
+                    else{
+                        d.id = 0;
+                        console.log("Setting new id to: 0")
+                        return d;
+                    }
+                });
+                console.log("id here: " + d.id)
+
+                database.query("INSERT INTO dateideas(id, date) VALUES ?", [[[d.id, d.date]]], function(err, result){
+                    console.log("\nInserting new row with values: \nid: " + d.id + "\ndate: " + d.date)
                     if (err){
                         bot.sendMessage({
                             to:channelID,
