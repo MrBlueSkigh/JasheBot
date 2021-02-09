@@ -50,21 +50,21 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'ping':
                 bot.sendMessage({
                     to: channelID,
-                    message: '<@177588140557467648> test'
+                    message: '<@177588140557467648> test :cowboy:'
                 });
                 break;
 
             case 'ilyjade':
                 bot.sendMessage({
                     to:channelID,
-                    message: jadeTag + ", I love you :) <3"
+                    message: jadeTag + ", I love you :) :heart:"
                 });
                 break;
 
             case 'ilyjosh':
                 bot.sendMessage({
                     to:channelID,
-                    message: joshTag + ", I love you :) <3"
+                    message: joshTag + ", I love you :) :heart:"
                 });
                 break;
 
@@ -73,7 +73,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 args.forEach(item => {
                     date += item + " ";
                 });
-                var sql = "INSERT INTO dateideas(date) VALUES (\'"+date+"\')"
+                var sql = "INSERT INTO dateideas(date) VALUES (\'"+date+"\')";
                 database.query(sql, function(err, result){
                     if (err){
                         bot.sendMessage({
@@ -91,40 +91,77 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
 
             case 'dateidea':
-                var randomDate = dateIdeas[Math.floor(Math.random() * dateIdeas.length)];
-                console.log(randomDate);
-                bot.sendMessage({
-                    to:channelID,
-                    message: "We should do: " + randomDate + "!"
+                var sql = "SELECT date FROM dateideas ORDER BY RAND() LIMIT 1";
+                database.query(sql, function(err, result, fields){
+                    if(result[0] != undefined){
+                        if (err){
+                            bot.sendMessage({
+                                to:channelID,
+                                message: err
+                            });
+                        }
+                        else{
+                            bot.sendMessage({
+                                to:channelID,
+                                message: "We should do: " + result[0].date + "!"
+                            });
+                        }       
+                    }
+                    else{
+                        bot.sendMessage({
+                            to:channelID,
+                            message: "No dates to choose from :cry:\nTry adding some using !adddate"
+                        });
+                    }
                 });
                 break;
 
             case 'cleardates':
-                dateIdeas.splice(0, dateIdeas.length);
-                bot.sendMessage({
-                    to:channelID,
-                    message: "Clearing all stored dates"
+                var sql = "TRUNCATE table dateideas";
+                database.query(sql, function(err, result, fields){
+                    if (err){
+                        bot.sendMessage({
+                            to:channelID,
+                            message: err
+                        });
+                    }
+                    else{
+                        bot.sendMessage({
+                            to:channelID,
+                            message: "Clearing all dates :frowning2:"
+                        });
+                    }
                 });
                 break;
 
             case 'datelist':
-                var dateList = "";
-                dateIdeas.forEach(date => {
-                    dateList = dateList + date + "\n";
+                var sql = "SELECT date FROM dateideas";
+                var list = "**Here are all of our dates!**\n";
+                database.query(sql, function(err, result, fields){
+                    if(result[0] != undefined){
+                        if(err){
+                            bot.sendMessage({
+                                to:channelID,
+                                message: err
+                            });
+                        }
+                        else{
+                            result.forEach(item => {
+                                list += item.date + "\n"
+                            });
+                            bot.sendMessage({
+                                to:channelID,
+                                message: list
+                            });
+                        }
+                    }
+                    else{
+                        bot.sendMessage({
+                            to:channelID,
+                            message: "There aren't any dates added :sob:\nTry adding some using !adddate"
+                        });
+                    }
                 });
-
-                if(dateIdeas.length == 0){
-                    bot.sendMessage({
-                        to:channelID,
-                        message: "Oh no! There are no dates stored!"
-                    });
-                }
-                else{
-                    bot.sendMessage({
-                        to:channelID,
-                        message: dateList
-                    });   
-                }
                 break;
          }
      }
