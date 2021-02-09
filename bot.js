@@ -50,7 +50,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'ping':
                 bot.sendMessage({
                     to: channelID,
-                    message: '<@177588140557467648> test :cowboy:'
+                    message: '<@177588140557467648> :cowboy:'
                 });
                 break;
 
