@@ -7,7 +7,7 @@ const { Console } = require('winston/lib/winston/transports');
 const database = createConnection({
     host: 'localhost',
     user: 'dbuser',
-    password: 'dbuser',
+    password: process.env.DBUSER_PASS,
     database: 'jashebot_db',
 });
 
