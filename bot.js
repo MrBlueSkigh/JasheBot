@@ -19,8 +19,6 @@ logger.add(new logger.transports.Console, {
 });
 logger.level = 'debug';
 
-const jadeTag = "<@689524675516432436>";
-const joshTag = "<@177588140557467648>";
 var dateIdeas = Array();
 
 // Initialize Discord Bot
@@ -50,21 +48,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'ping':
                 bot.sendMessage({
                     to: channelID,
-                    message: '<@177588140557467648> :cowboy:'
-                });
-                break;
-
-            case 'ilyjade':
-                bot.sendMessage({
-                    to:channelID,
-                    message: jadeTag + ", I love you :) :heart:"
-                });
-                break;
-
-            case 'ilyjosh':
-                bot.sendMessage({
-                    to:channelID,
-                    message: joshTag + ", I love you :) :heart:"
+                    message: ':cowboy:'
                 });
                 break;
 
