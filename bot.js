@@ -1,6 +1,16 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
+
+const { createConnection } = require('mysql');
+const { Console } = require('winston/lib/winston/transports');
+const database = createConnection({
+    host: 'localhost',
+    user: 'dbuser',
+    password: 'dbuser',
+    database: 'jashebot_db',
+});
+
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
@@ -21,7 +31,13 @@ bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
+
+    database.connect(function(err){
+        if (err) throw err;
+        console.log("Connected to jashebot_db");
+    });
 });
+
 bot.on('message', function (user, userID, channelID, message, evt) {
     if (message.substring(0, 1) == '!') {
         var args = message.substring(1).split(' ');
@@ -55,10 +71,20 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 args.forEach(item => {
                     date += item + " ";
                 });
-                dateIdeas.push(date);
-                bot.sendMessage({
-                    to:channelID,
-                    message: "Added \"" + date + "\" to the list! Yay!"
+                var sql = "INSERT INTO dateideas(date) VALUES (\'"+date+"\')"
+                database.query(sql, function(err, result){
+                    if (err){
+                        bot.sendMessage({
+                            to:channelID,
+                            message: err
+                        });
+                    }
+                    else{
+                        bot.sendMessage({
+                            to:channelID,
+                            message: "Added \"" + date + "\" to the list. Yay!"
+                        });
+                    }
                 });
                 break;
 
