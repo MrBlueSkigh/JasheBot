@@ -6,7 +6,7 @@ const { createConnection } = require('mysql');
 const { Console } = require('winston/lib/winston/transports');
 const database = createConnection({
     host: 'localhost',
-    user: 'dbuser',
+    user: process.env.DBUSER_NAME,
     password: process.env.DBUSER_PASS,
     database: 'jashebot_db',
 });
