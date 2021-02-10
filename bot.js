@@ -109,7 +109,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
                 function fetchID_adddate(dateObj, callback){
                     database.query("SELECT MAX(id) AS maxid FROM dateideas", function(err, result){
-                        if(result[0] != undefined){
+                        if(result[0].maxid != undefined){
                             if(err){
                                 callback(err, null);
                             }
@@ -132,28 +132,20 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
             // Pull a random date from the database and reccommend it
             case 'dateidea':
-                var sql = "SELECT date FROM dateideas ORDER BY RAND() LIMIT 1 WHERE isDone = 0";
+                var sql = "SELECT date FROM dateideas WHERE isDone = 0 ORDER BY RAND() LIMIT 1";
                 database.query(sql, function(err, result, fields){
-                    if(result[0] != undefined){
-                        if (err){
-                            bot.sendMessage({
-                                to:channelID,
-                                message: err
-                            });
-                        }
-                        else{
-                            bot.sendMessage({
-                                to:channelID,
-                                message: "We should do: " + result[0].date + "!"
-                            });
-                        }       
+                    if (err){
+                        bot.sendMessage({
+                            to:channelID,
+                            message: err
+                        });
                     }
                     else{
                         bot.sendMessage({
                             to:channelID,
-                            message: "No dates to choose from :cry:\nTry adding some using **!adddate**"
+                            message: "We should do: " + result[0].date + "!"
                         });
-                    }
+                    }       
                 });
                 break;
 
