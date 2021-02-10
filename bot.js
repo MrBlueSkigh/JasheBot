@@ -79,56 +79,60 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
 
+            // Add date to the database (id, date, isDone)
             case 'adddate':
-                let d = new Date();
-                var date = "";
+                var dateStr = "";
                 args.forEach(item => {
-                    date += item + " ";
+                    dateStr += item + " ";
                 });
-                d.date = date;
+                dateStr = dateStr.substring(0, dateStr.length-1);
 
-                database.query("SELECT MAX(id) AS maxid FROM dateideas", function(err, result, fields){
-                    if(result[0] != undefined){
-                        console.log("Current max id: " + result[0].maxid)
-                        if(err){
-                            bot.sendMessage({
-                                to:channelID,
-                                message:err
-                            });
+                function insertIntoDB(err, dateObj){
+                    if(err) throw err;
+                    else{
+                        database.query("INSERT INTO dateideas(id, date, isDone) VALUES ?", [[[dateObj.id, dateObj.date, 0]]], function(err, results){
+                            if (err){
+                                bot.sendMessage({
+                                    to:channelID,
+                                    message: err
+                                });
+                            }
+                            else{
+                                bot.sendMessage({
+                                    to:channelID,
+                                    message: "Added \"" + dateObj.date + "\" to the list. Yay!"
+                                });
+                            }
+                        });   
+                    }
+                }
+
+                function fetchID_adddate(dateObj, callback){
+                    database.query("SELECT MAX(id) AS maxid FROM dateideas", function(err, result){
+                        if(result[0] != undefined){
+                            if(err){
+                                callback(err, null);
+                            }
+                            else{
+                                dateObj.id = result[0].maxid + 1;
+                                callback(null, dateObj);
+                            }
                         }
                         else{
-                            d.id = result[0].maxid + 1
-                            console.log("Setting new id to: " + d.id)
-                            return d;
+                            dateObj.id = 0;
+                            callback(null, dateObj);
                         }
-                    }
-                    else{
-                        d.id = 0;
-                        console.log("Setting new id to: 0")
-                        return d;
-                    }
-                });
-                console.log("id here: " + d.id)
-
-                database.query("INSERT INTO dateideas(id, date) VALUES ?", [[[d.id, d.date]]], function(err, result){
-                    console.log("\nInserting new row with values: \nid: " + d.id + "\ndate: " + d.date)
-                    if (err){
-                        bot.sendMessage({
-                            to:channelID,
-                            message: err
-                        });
-                    }
-                    else{
-                        bot.sendMessage({
-                            to:channelID,
-                            message: "Added \"" + date + "\" to the list. Yay!"
-                        });
-                    }
-                });
+                    });
+                }
+                
+                var d = new Date();
+                d.date = dateStr;
+                fetchID_adddate(d, insertIntoDB);
                 break;
 
+            // Pull a random date from the database and reccommend it
             case 'dateidea':
-                var sql = "SELECT date FROM dateideas ORDER BY RAND() LIMIT 1";
+                var sql = "SELECT date FROM dateideas ORDER BY RAND() LIMIT 1 WHERE isDone = 0";
                 database.query(sql, function(err, result, fields){
                     if(result[0] != undefined){
                         if (err){
@@ -153,6 +157,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
 
+            // Clear all rows on the date database
             case 'cleardates':
                 var sql = "TRUNCATE table dateideas";
                 database.query(sql, function(err, result, fields){
@@ -171,8 +176,9 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
 
+            // List all currently entered date ideas
             case 'datelist':
-                var sql = "SELECT date FROM dateideas";
+                var sql = "SELECT date, isDone FROM dateideas";
                 var list = "**Here are all of our dates!**\n";
                 database.query(sql, function(err, result, fields){
                     if(result[0] != undefined){
@@ -184,7 +190,10 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         }
                         else{
                             result.forEach(item => {
-                                list += item.date + "\n"
+                                var doneMsg = "";
+                                if(item.isDone) doneMsg = "Done!";
+                                else doneMsg = "Undone!"
+                                list += item.date + "\t" + doneMsg + "\n";
                             });
                             bot.sendMessage({
                                 to:channelID,
@@ -199,6 +208,49 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         });
                     }
                 });
+                break;
+
+            case 'datedone':
+                argStr = "";
+                args.forEach(item => {
+                    argStr += item + " ";
+                });
+                argStr = argStr.substring(0, argStr.length-1);
+
+                function updateDB(err, id){
+                    if(err){
+                        bot.sendMessage({
+                            to:channelID,
+                            message:"Seems like I can't find that date :confused: try making sure it's added by using !datelist"
+                        });
+                    }
+                    else{
+                        database.query("UPDATE dateideas SET isDone = 1 WHERE id = ?", [[[id]]], function(err, result, fields){
+                            if(err) throw err;
+                            else{
+                                bot.sendMessage({
+                                    to:channelID,
+                                    message:"That date is now marked as done! :grin:"
+                                });
+                            }
+                        });
+                    }
+                }
+                function fetchID_datedone(date, callback){
+                    database.query("SELECT id FROM dateideas WHERE date=?", [[[date]]], function(err, result, fields){
+                        if(err){
+                            bot.sendMessage({
+                                to:channelID,
+                                message:"Seems like I can't find that date :confused: try making sure it's added by using !datelist"
+                            });
+                        }
+                        else{
+                            console.log(result[0])
+                        } //callback(null, result[0].id);
+                    });
+                }
+
+                fetchID_datedone(argStr, updateDB);
                 break;
          }
      }
