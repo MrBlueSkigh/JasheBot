@@ -210,6 +210,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
 
+            // Mark existing date as finished
             case 'datedone':
                 argStr = "";
                 args.forEach(item => {
@@ -237,7 +238,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     }
                 }
                 function fetchID_datedone(date, callback){
-                    database.query("SELECT id FROM dateideas WHERE date=?", [[[date]]], function(err, result, fields){
+                    database.query("SELECT id FROM dateideas WHERE date = ?", [[[date]]], function(err, result, fields){
                         if(err){
                             bot.sendMessage({
                                 to:channelID,
@@ -245,8 +246,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                             });
                         }
                         else{
-                            console.log(result[0])
-                        } //callback(null, result[0].id);
+                            callback(null, result[0].id);
+                        } 
                     });
                 }
 
