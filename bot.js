@@ -151,7 +151,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     else{
                         bot.sendMessage({
                             to:channelID,
-                            message: "No dates to choose from :cry:\nTry adding some using !adddate"
+                            message: "No dates to choose from :cry:\nTry adding some using **!adddate**"
                         });
                     }
                 });
@@ -204,7 +204,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     else{
                         bot.sendMessage({
                             to:channelID,
-                            message: "There aren't any dates added :sob:\nTry adding some using !adddate"
+                            message: "There aren't any dates added :sob:\nTry adding some using **!adddate**"
                         });
                     }
                 });
@@ -222,7 +222,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     if(err){
                         bot.sendMessage({
                             to:channelID,
-                            message:"Seems like I can't find that date :confused: try making sure it's added by using !datelist"
+                            message:"Seems like I can't find that date :confused: try making sure it's added by using **!datelist**"
                         });
                     }
                     else{
@@ -242,7 +242,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         if(err){
                             bot.sendMessage({
                                 to:channelID,
-                                message:"Seems like I can't find that date :confused: try making sure it's added by using !datelist"
+                                message:"Seems like I can't find that date :confused: try making sure it's added by using **!datelist**"
                             });
                         }
                         else{
@@ -253,6 +253,19 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
                 fetchID_datedone(argStr, updateDB);
                 break;
+
+            case 'help':
+                 bot.sendMessage({
+                    to:channelID,
+                    message:"Here are a list of commands available:\n\n**Date List**\n**--------------**\n**!adddate** - Adds date to the date list\n**!dateidea** - Gives a random date idea from list that hasn't already been done\n**!datelist** - Displays all current dates on the list with their status (done/not done)\n**!datedone** - Mark an undone date as done\n**!cleardates** - Clears the date list (cannot be undone)"
+                })
+                break;
+
+            default:
+                bot.sendMessage({
+                    to:channelID,
+                    message:"Im afraid I don't understand that command :confused: use **!help** for a listing of all commands!"
+                })
          }
      }
 });
