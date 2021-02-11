@@ -12,32 +12,29 @@ const database = createConnection({
 });
 
 class Date{
-    id;
-    date;
-    isDone;
     constructor(){
-        this.id = 0;
-        this.date = "";
-        this.isDone = 0;
+        this._id = 0;
+        this._date = "";
+        this._isDone = 0;
     }
 
     get id(){
-        return this.id;
+        return this._id;
     }
     get date(){
-        return this.date;
+        return this._date;
     }
     get isDone(){
-        return this.isDone;
+        return this._isDone;
     }
     set id(val){
-        this.id = val;
+        this._id = val;
     }
     set date(val){
-        this.date = val;
+        this._date = val;
     }
     set isDone(val){
-        this.isDone = val;
+        this._isDone = val;
     }
 }
 
@@ -141,10 +138,18 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         });
                     }
                     else{
-                        bot.sendMessage({
-                            to:channelID,
-                            message: "We should do: " + result[0].date + "!"
-                        });
+                        if(result[0] == undefined){
+                            bot.sendMessage({
+                                to:channelID,
+                                message:"There arent any undone dates to choose from!"
+                            });
+                        }
+                        else{
+                            bot.sendMessage({
+                                to:channelID,
+                                message: "We should do: " + result[0].date + "!"
+                            });
+                        }
                     }       
                 });
                 break;
