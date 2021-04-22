@@ -1,7 +1,6 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 require('dotenv').config();
-var SpotifyWebApi = require('spotify-web-api-node');
 const { createConnection } = require('mysql');
 const { Console } = require('winston/lib/winston/transports');
 var url = require('url'); 
@@ -14,51 +13,6 @@ const database = createConnection({
     database: 'jashebot_db',
 });
 
-var scopes = ['user-read-private', 'user-read-email'],
-    redirectUri = 'http://localhost:8080/callback',
-    clientID = process.env.SPOTIFY_CLIENTID,
-    state = '',
-    clientSecret = process.env.SPOTIFY_CLIENTSECRET
-
-var spotifyApi = new SpotifyWebApi({
-    redirectUri: redirectUri,
-    clientId: clientID
-});
-
-var authorizeUrl = spotifyApi.createAuthorizeURL(scopes, state);
-console.log(authorizeUrl);
-var code = "AQAGfCaUvexwA7xXwYoI6Egalsk8g5U8iqjv_Ehk92ym4FI2ypCMcrLYBx8n4wc1iij_iFbAWd4F0bJdeVSOXfsHvTRkZO9Jpu480M9pIw7lOZ9SK_3Jxw3QsvENhMOnl98rPt_daMJQ-Lszb6mIsMxBEG3j4szvaUNKato3Fxtx-c22UP2uy98t6Xn8qtuzhyR-etpnszVxoqxMjFBKgdhrSIZuKw"
-var credentials = {
-    clientId: clientID,
-    clientSecret: clientSecret,
-    redirectUri: redirectUri
-};
-var spotifyApi = new SpotifyWebApi(credentials);
-
-spotifyApi.authorizationCodeGrant(code).then(
-    function(data){
-        console.log('The token expires in ' + data.body['expires_in']);
-        console.log('The access token is ' + data.body['access_token']);
-        console.log('The refresh token is ' + data.body['refresh_token']);       
-        spotifyApi.setAccessToken(data.body['access_token']);
-        spotifyApi.setRefreshToken(data.body['refresh_token']);
-    }, function(err){
-        console.log('Something went wrong!', err);       
-    }
-);
-spotifyApi.refreshAccessToken().then(
-    function(data){
-        console.log('The access token has been refreshed');
-        spotifyApi.setAccessToken(data.body['access_token']);
-    },
-    function(err){
-        console.log('Could not refresh the access token :' + err);
-    }
-);
-
-//spotifyApi.setAccessToken('BQDG354CtpFtvxdPHs4Po8Jv3WUVkxuqeE2pI-CEHyW6ouOCbw7M6BDwd_ppmbRdx0QQmwVDtcQ9ysagvaEgwEF2HCuTMUhhQ0veswFFWdVyJXmNAGLp5NE6rTMkx2HZwhSSfWeZZZ84LIF2n0uDxwb8hP9UYgxdxwQ');
-
-var musicChannel = '808114399445123112';
 var dateChannel = process.env.DATE_CHANNEL;
 
 class Date{
@@ -299,54 +253,6 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 }
 
                 fetchID_datedone(argStr, updateDB);
-                break;
-
-            case 'wholesome':
-                spotifyApi.getPlaylist('5SJ44YWIiSoSiCtl1I0BpG').then(function(data){
-                    bot.sendMessage({
-                        to:musicChannel,
-                        message:data.body.external_urls.spotify
-                    });
-                    //console.log(data.body.external_urls.spotify);
-                }, function(error){
-                    bot.sendMessage({
-                        to:musicChannel,
-                        message:error
-                    });
-                });
-                break;
-            
-            case 'play':
-                spotifyApi.play().then(function(){
-                    bot.sendMessage({
-                        to:musicChannel,
-                        message:"Resuming Playback"
-                    });
-                }, function(error){
-                    bot.sendMessage({
-                        to:musicChannel,
-                        message:"Error trying to resume playback: " + error
-                    });
-                });
-                break;
-
-            case 'song':
-                argStr = "";
-                args.forEach(item => {
-                    argStr += item + " ";
-                });
-                argStr = argStr.substring(0, argStr.length-1);
-                stArg = "track:"+argStr;
-
-                spotifyApi.searchTracks(stArg).then(function(data){
-                    var song = data.body.tracks.items[0].external_urls.spotify;
-                    bot.sendMessage({
-                        to:musicChannel,
-                        message: "Heres what I found that best fit that name: \n" + song
-                    });
-                }, function(error){
-                    console.log("error: " + error);
-                });
                 break;
 
             case 'help':
